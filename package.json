@@ -1,15 +1,15 @@
 {
-  "name": "ts-npm-package-boilerplate-2024",
+  "name": "spotify-lyrics-ts",
   "type": "module",
-  "description": "TS NPM Package Boilerplate for 2024 ",
+  "description": "A TypeScript library to fetch lyrics from Spotify.",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/simonorzel26/ts-npm-package-boilerplate-2024.git"
+    "url": "git+https://github.com/lkekana/spotify-lyrics-ts.git"
   },
-  "homepage": "https://github.com/simonorzel26/ts-npm-package-boilerplate-2024",
+  "homepage": "https://github.com/lkekana/spotify-lyrics-ts",
   "files": [
     "dist/**/*"
   ],
@@ -19,7 +19,7 @@
     "workflow:check": "biome check ./src",
     "release": "pnpm run build && changeset publish"
   },
-  "author": "Simon Orzel",
+  "author": "Lesedi Kekana",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
@@ -28,6 +28,6 @@
     "typescript": "^5.5.3"
   },
   "bugs": {
-    "url": "https://github.com/simonorzel26/ts-npm-package-boilerplate-2024/issues"
+    "url": "https://github.com/lkekana/spotify-lyrics-ts/issues"
   }
 }
