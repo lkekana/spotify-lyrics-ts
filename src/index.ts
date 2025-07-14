@@ -3,6 +3,8 @@ import { Spotify } from "./API.js";
 /*
 const s = new Spotify("<A Valid SP_DC Cookie>");
 s.initialize().then(() => {
+	console.log("Your Spotify Session Info:", s.sessionInfo);
+
 	s.getMe().then((user) => {
 		console.log("User Profile:", user);
 
@@ -27,3 +29,6 @@ s.initialize().then(() => {
 	});
 });
 */
+
+export * from "./API.js";
+export * from "./error.js";
