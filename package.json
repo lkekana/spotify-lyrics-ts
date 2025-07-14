@@ -2,7 +2,7 @@
 	"name": "spotify-lyrics-ts",
 	"type": "module",
 	"description": "A TypeScript library to fetch lyrics from Spotify.",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"repository": {

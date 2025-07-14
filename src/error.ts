@@ -5,14 +5,10 @@ class CustomError extends Error {
 	}
 }
 
-export class NotValidSpDcError extends CustomError {
-}
+export class NotValidSpDcError extends CustomError {}
 
-export class CorruptedConfigError extends CustomError {
-}
+export class CorruptedConfigError extends CustomError {}
 
-export class NoSongPlayingError extends CustomError {
-}
+export class NoSongPlayingError extends CustomError {}
 
-export class TOTPGenerationError extends CustomError {
-}
+export class TOTPGenerationError extends CustomError {}
