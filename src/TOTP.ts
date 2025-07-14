@@ -5,9 +5,9 @@ thanks to
 */
 
 const SECRET = new TextEncoder().encode(
-	"10239356982684469120121471223494829410773366870",
+	"55601029510267381196079975060119874370686866",
 );
-export const VERSION = 11;
+export const VERSION = 14;
 export const PERIOD = 30;
 export const DIGITS = 6;
 
