@@ -10,11 +10,9 @@ import {
 } from "@spotify/web-api-ts-sdk";
 import { generate, VERSION } from "./TOTP.js";
 import {
-	NoSongPlayingError,
 	NotValidSpDcError,
 	TOTPGenerationError,
 } from "./error.js";
-import { convertLimit } from "./utils.js";
 import { formatLrc } from "./formatting.js";
 
 const TOKEN_URL = "https://open.spotify.com/api/token";
