@@ -1,16 +1,18 @@
 import { generate } from "./TOTP.js";
-import {
-	NotValidSpDcError,
-	TOTPGenerationError,
-} from "./error.js";
+import { NotValidSpDcError, TOTPGenerationError } from "./error.js";
 import { formatLrc } from "./formatting.js";
-import type { GQLTrack, TrackMetadata } from "./types.js";
+import type {
+	GQLTrack,
+	LyricsResponse,
+	ProfileAttributes,
+	Session,
+	TrackMetadata,
+} from "./types.js";
 
 const TOKEN_URL = "https://open.spotify.com/api/token";
 const SERVER_TIME_URL = "https://open.spotify.com/api/server-time";
 const SPOTIFY_HOME_PAGE_URL = "https://open.spotify.com/";
 const CLIENT_VERSION = "1.2.46.25.g7f189073";
-const CID = "d8a5ed958d274c2e8ee717e6a4b0971d";
 
 const HEADERS = {
 	accept: "application/json",
@@ -31,66 +33,8 @@ const HEADERS = {
 	"spotify-app-version": CLIENT_VERSION,
 	"app-platform": "WebPlayer",
 };
-const SP_BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-export type Session = {
-	clientId: string;
-	accessToken: string;
-	accessTokenExpirationTimestampMs: number;
-	isAnonymous: boolean;
-	_notes: string;
-	totpVerExpired: string;
-	totpValidUntil: string;
-};
-
-export type Line = {
-	startTimeMs: string;
-	words: string;
-	syllables: string[];
-	endTimeMs: string;
-};
-
-export type LyricsResponse = {
-	lyrics: {
-		syncType: string;
-		lines: Line[];
-		provider: string;
-		providerLyricsId: string;
-		providerDisplayName: string;
-		syncLyricsUri: string;
-		isDenseTypeface: boolean;
-		alternatives: string[];
-		language: string;
-		isRtlLanguage: boolean;
-		capStatus: string;
-		previewLines: Line[];
-	};
-	colors: {
-		background: number;
-		text: number;
-		highlightText: number;
-	};
-	hasVocalRemoval: boolean;
-};
-
-export type ProfileAttributes = {
-	data: {
-		me: {
-			profile: {
-				avatar: { sources: Image[] };
-				avatarBackgroundColor: number;
-				name: string;
-				uri: string;
-				username: string;
-			};
-		};
-	};
-};
-interface Image {
-	url: string;
-	height: number;
-	width: number;
-}
+const SP_BASE62 =
+	"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export class Spotify {
 	private token: string | undefined = undefined;
@@ -235,7 +179,7 @@ export class Spotify {
 				true,
 			);
 			if (response.status === 200) {
-				return await response.json() as TrackMetadata;
+				return (await response.json()) as TrackMetadata;
 			}
 			return null;
 		} catch (error) {
@@ -259,7 +203,7 @@ export class Spotify {
 				true,
 			);
 			if (response.status === 200) {
-				return await response.json() as GQLTrack;
+				return (await response.json()) as GQLTrack;
 			}
 			return null;
 		} catch (error) {
@@ -296,14 +240,13 @@ export class Spotify {
 			return null;
 		}
 		// converting to hex is like 90% accurate in Javascript (for some reason) so we use the GQL method as a fallback
-		let trackData: TrackMetadata | GQLTrack | null = await this.getTrack(trackId);
+		let trackData: TrackMetadata | GQLTrack | null =
+			await this.getTrack(trackId);
 		if (trackData !== null) {
 			return formatLrc(lyricsResponse, {
 				name: trackData.name,
 				albumName: trackData.album.name,
-				artist: trackData.artist
-					.map((a) => a.name)
-					.join(", "),
+				artist: trackData.artist.map((a) => a.name).join(", "),
 				duration_ms: trackData.duration,
 			});
 		}
@@ -312,13 +255,18 @@ export class Spotify {
 			return formatLrc(lyricsResponse, {
 				name: trackData.data.trackUnion.name,
 				albumName: "", // not included in GQL track data
-				artist: trackData.data.trackUnion.artistsWithRoles ? trackData.data.trackUnion.artistsWithRoles.items
-					.map((a) => a.artist.profile.name)
-					.join(", ") : "",
-				duration_ms: trackData.data.trackUnion.duration.totalMilliseconds,
+				artist: trackData.data.trackUnion.artistsWithRoles
+					? trackData.data.trackUnion.artistsWithRoles.items
+							.map((a) => a.artist.profile.name)
+							.join(", ")
+					: "",
+				duration_ms:
+					trackData.data.trackUnion.duration.totalMilliseconds,
 			});
 		}
-		throw new Error(`Failed to retrieve track metadata for track ID: ${trackId}`);
+		throw new Error(
+			`Failed to retrieve track metadata for track ID: ${trackId}`,
+		);
 	}
 }
 

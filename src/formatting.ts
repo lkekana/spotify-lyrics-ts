@@ -1,13 +1,4 @@
-import type { SimplifiedArtist } from "@spotify/web-api-ts-sdk";
-import type { LyricsResponse } from "./API.js";
-import type { GQLTrack, TrackMetadata } from "./types.js";
-
-interface TrackData {
-	name: string;
-	album_name: string;
-	artist: string;
-	duration_ms: number;
-}
+import type { LyricsResponse } from "./types.js";
 
 interface LyricsLine {
 	startTimeMs?: string;
@@ -28,10 +19,6 @@ export interface LRCMetadata {
 	duration_ms: number;
 }
 
-export function getArtistName(artists: SimplifiedArtist[]): string {
-	return artists.map((artist) => artist.name).join(", ");
-}
-
 export function formatLrc(l: LyricsResponse, metadata: LRCMetadata): string {
 	const lyrics = l.lyrics.lines;
 	const durationSeconds = metadata.duration_ms / 1000;
@@ -48,7 +35,7 @@ export function formatLrc(l: LyricsResponse, metadata: LRCMetadata): string {
 				.toFixed(2)
 				.padStart(5, "0")}]`,
 		);
-	
+
 	for (const line of lyrics) {
 		if (l.lyrics.syncType === "UNSYNCED") {
 			lrc.push(line.words);
