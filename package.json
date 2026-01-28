@@ -10,7 +10,9 @@
 		"url": "git+https://github.com/lkekana/spotify-lyrics-ts.git"
 	},
 	"homepage": "https://github.com/lkekana/spotify-lyrics-ts",
-	"files": ["dist/**/*"],
+	"files": [
+		"dist/**/*"
+	],
 	"scripts": {
 		"build": "tsc",
 		"check": "biome check --write ./src",
@@ -29,5 +31,6 @@
 		"url": "https://github.com/lkekana/spotify-lyrics-ts/issues"
 	},
 	"dependencies": {
+		"@types/node": "^25.0.10"
 	}
 }
