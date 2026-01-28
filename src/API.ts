@@ -1,5 +1,6 @@
 import { generate } from "./TOTP.js";
 import { NotValidSpDcError, TOTPGenerationError } from "./error.js";
+import { SERVER_TIME_URL, SpotifyClient, TOKEN_URL } from "./extract.js";
 import { formatLrc } from "./formatting.js";
 import type {
 	GQLTrack,
@@ -9,44 +10,31 @@ import type {
 	TrackMetadata,
 } from "./types.js";
 
-const TOKEN_URL = "https://open.spotify.com/api/token";
-const SERVER_TIME_URL = "https://open.spotify.com/api/server-time";
-const SPOTIFY_HOME_PAGE_URL = "https://open.spotify.com/";
-const CLIENT_VERSION = "1.2.46.25.g7f189073";
-
-const HEADERS = {
-	accept: "application/json",
-	"accept-language": "en-US",
-	"content-type": "application/json",
-	origin: SPOTIFY_HOME_PAGE_URL,
-	priority: "u=1, i",
-	referer: SPOTIFY_HOME_PAGE_URL,
-	"sec-ch-ua":
-		'"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
-	"sec-ch-ua-mobile": "?0",
-	"sec-ch-ua-platform": '"Windows"',
-	"sec-fetch-dest": "empty",
-	"sec-fetch-mode": "cors",
-	"sec-fetch-site": "same-site",
-	"user-agent":
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-	"spotify-app-version": CLIENT_VERSION,
-	"app-platform": "WebPlayer",
-};
 const SP_BASE62 =
 	"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const profileAttributesHash =
+	"53bcb064f6cd18c23f752bc324a791194d20df612d8e1239c735144ab0399ced";
+const getTrackHash =
+	"612585ae06ba435ad26369870deaae23b5c8800a256cd8a57e08eddc25a37294";
 
 export class Spotify {
 	private token: string | undefined = undefined;
 	private dcToken: string;
+	private useLatestClientInfo: boolean;
+	private client: SpotifyClient;
 	public sessionInfo: Session | undefined = undefined;
 
-	constructor(dcToken: string) {
+	constructor(dcToken: string, useLatestClientInfo = false) {
 		this.dcToken = dcToken;
+		this.useLatestClientInfo = useLatestClientInfo;
+		this.client = new SpotifyClient();
 	}
 
 	async initialize(): Promise<void> {
 		await this.login();
+		if (this.useLatestClientInfo) {
+			await this.client.getSession();
+		}
 	}
 
 	private async fetchWithHeaders(
@@ -54,8 +42,11 @@ export class Spotify {
 		options: RequestInit = {},
 		includeBearer = false,
 	): Promise<Response> {
+		const apiHeaders = await this.client.getAPIHeaders(
+			this.useLatestClientInfo,
+		);
 		let headers = {
-			...HEADERS,
+			...apiHeaders,
 			Cookie: `sp_dc=${this.dcToken}`,
 			...(options.headers || {}),
 		};
@@ -153,8 +144,11 @@ export class Spotify {
 					extensions: {
 						persistedQuery: {
 							version: 1,
-							sha256Hash:
-								"53bcb064f6cd18c23f752bc324a791194d20df612d8e1239c735144ab0399ced",
+							sha256Hash: this.useLatestClientInfo
+								? await this.client.partHash(
+										"profileAttributes",
+									)
+								: profileAttributesHash,
 						},
 					},
 				}),
@@ -190,27 +184,33 @@ export class Spotify {
 	}
 
 	async getGQLTrack(trackId: string): Promise<GQLTrack | null> {
-		const params = `operationName=getTrack&variables=${encodeURIComponent(
-			`{"uri":"spotify:track:${trackId}"}`,
-		)}&extensions=${encodeURIComponent(
-			'{"persistedQuery":{"version":1,"sha256Hash":"d208301e63ccb8504831114cb8db1201636a016187d7c832c8c00933e2cd64c6"}}',
-		)}`;
 		await this.refreshSession();
-		try {
-			const response = await this.fetchWithHeaders(
-				`https://api-partner.spotify.com/pathfinder/v1/query?${params}`,
-				{},
-				true,
-			);
-			if (response.status === 200) {
-				return (await response.json()) as GQLTrack;
-			}
-			return null;
-		} catch (error) {
-			console.warn(`Failed to fetch track data for track ID: ${trackId}`);
-			console.error(error);
-			return null;
+		const resp = await this.fetchWithHeaders(
+			"https://api-partner.spotify.com/pathfinder/v2/query",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					operationName: "getTrack",
+					variables: {
+						uri: `spotify:track:${trackId}`,
+					},
+					extensions: {
+						persistedQuery: {
+							version: 1,
+							sha256Hash: this.useLatestClientInfo
+								? await this.client.partHash("getTrack")
+								: getTrackHash,
+						},
+					},
+				}),
+			},
+			true,
+		);
+		if (!resp.ok) {
+			throw new Error(`HTTP error! status: ${resp.status}`);
 		}
+		const respObj: GQLTrack = await resp.json();
+		return respObj;
 	}
 
 	async getLyrics(trackId: string): Promise<LyricsResponse | null> {
