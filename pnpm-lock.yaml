@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@spotify/web-api-ts-sdk':
-        specifier: ^1.2.0
-        version: 1.2.0
     devDependencies:
       '@biomejs/biome':
         specifier: 1.8.3
@@ -156,9 +152,6 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
-
-  '@spotify/web-api-ts-sdk@1.2.0':
-    resolution: {integrity: sha512-JUaebva3Ohwo5I5tuTqyW/FKGOMbb40YevJMySAOINRxP7qQ/AMjBzfJx0zeO6yS+wAPfQSoGNsZaUggHw8vsA==}
 
   '@total-typescript/tsconfig@1.0.4':
     resolution: {integrity: sha512-fO4ctMPGz1kOFOQ4RCPBRBfMy3gDn+pegUfrGyUFRMv/Rd0ZM3/SHH3hFCYG4u6bPLG8OlmOGcBLDexvyr3A5w==}
@@ -670,8 +663,6 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
-
-  '@spotify/web-api-ts-sdk@1.2.0': {}
 
   '@total-typescript/tsconfig@1.0.4': {}
 
